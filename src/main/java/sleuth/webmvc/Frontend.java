@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.sleuth.Sampler;
 import org.springframework.cloud.sleuth.sampler.AlwaysSampler;
+import org.springframework.cloud.sleuth.util.ExceptionUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +32,7 @@ public class Frontend {
 	 * The spring application name is used for the Zipkin service name
 	 */
 	public static void main(String[] args) {
+		ExceptionUtils.setFail(true);
 		SpringApplication.run(Frontend.class, "--spring.application.name=frontend",
 				"--server.port=8085");
 	}

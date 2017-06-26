@@ -27,28 +27,57 @@ class SpanSubscriber extends AtomicBoolean
 	SpanSubscriber(Subscriber<? super Object> subscriber, Context ctx, Tracer tracer) {
 		this.subscriber = subscriber;
 		this.tracer = tracer;
-
 		Span root = ctx.getOrDefault(Span.class, tracer.getCurrentSpan());
+		if (log.isDebugEnabled()) {
+			log.debug("Span from context [{}]", root);
+		}
 		this.rootSpan = root != null && root.getSavedSpan() == null ? root : null;
+		if (log.isDebugEnabled()) {
+			log.debug("Stored context root span [{}]", this.rootSpan);
+		}
 		this.span = tracer.createSpan(subscriber.toString(), root);
+		if (log.isDebugEnabled()) {
+			log.debug("Created span [{}]", this.span);
+		}
 		this.context = ctx.put(Span.class, this.span);
 	}
 
 	@Override public void onSubscribe(Subscription subscription) {
+		if (log.isDebugEnabled()) {
+			log.debug("On subscribe");
+		}
 		this.s = subscription;
 		tracer.continueSpan(span);
+		if (log.isDebugEnabled()) {
+			log.debug("On subscribe - span continued");
+		}
 		subscriber.onSubscribe(this);
 	}
 
 	@Override
 	public void request(long n) {
+		if (log.isDebugEnabled()) {
+			log.debug("Request");
+		}
 		tracer.continueSpan(span);
+		if (log.isDebugEnabled()) {
+			log.debug("Request - continued");
+		}
 		s.request(n);
+		// We're in the main thread so we don't want to pollute it with wrong spans
+		// that's why we need to detach the current one and continue with its parent
+		tracer.continueSpan(tracer.detach(span));
+		if (log.isDebugEnabled()) {
+			log.debug("Request after cleaning");
+		}
 	}
 
 	@Override
 	public void cancel() {
 		try {
+			if (log.isDebugEnabled()) {
+				log.debug("Cancel");
+			}
 			s.cancel();
 		}
 		finally {
@@ -80,14 +109,32 @@ class SpanSubscriber extends AtomicBoolean
 
 	void cleanup() {
 		if (compareAndSet(false, true)) {
+			if (log.isDebugEnabled()) {
+				log.debug("Cleaning up");
+			}
 			if (tracer.getCurrentSpan() != span) {
+				if (log.isDebugEnabled()) {
+					log.debug("Detaching span");
+				}
 				tracer.detach(tracer.getCurrentSpan());
 				tracer.continueSpan(span);
+				if (log.isDebugEnabled()) {
+					log.debug("Continuing span");
+				}
+			}
+			if (log.isDebugEnabled()) {
+				log.debug("Closing span");
 			}
 			tracer.close(span);
+			if (log.isDebugEnabled()) {
+				log.debug("Span closed");
+			}
 			if (rootSpan != null) {
 				tracer.continueSpan(rootSpan);
 				tracer.close(rootSpan);
+				if (log.isDebugEnabled()) {
+					log.debug("Closed root span");
+				}
 			}
 		}
 	}
