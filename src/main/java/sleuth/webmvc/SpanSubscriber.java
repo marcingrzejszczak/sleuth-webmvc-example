@@ -7,13 +7,13 @@ import org.reactivestreams.Subscription;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.context.Context;
-import reactor.util.context.ContextRelay;
+import reactor.util.context.Contextualized;
 
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
 
 class SpanSubscriber extends AtomicBoolean
-		implements Subscriber<Object>, Subscription, ContextRelay {
+		implements Subscriber<Object>, Subscription, Contextualized {
 
 	static final Logger log = Loggers.getLogger(SpanSubscriber.class);
 
@@ -24,7 +24,8 @@ class SpanSubscriber extends AtomicBoolean
 	private final Tracer                     tracer;
 	private       Subscription               s;
 
-	SpanSubscriber(Subscriber<? super Object> subscriber, Context ctx, Tracer tracer) {
+	SpanSubscriber(Subscriber<? super Object> subscriber, Context ctx, Tracer tracer,
+			String name) {
 		this.subscriber = subscriber;
 		this.tracer = tracer;
 		Span root = ctx.getOrDefault(Span.class, tracer.getCurrentSpan());
@@ -35,7 +36,7 @@ class SpanSubscriber extends AtomicBoolean
 		if (log.isDebugEnabled()) {
 			log.debug("Stored context root span [{}]", this.rootSpan);
 		}
-		this.span = tracer.createSpan(subscriber.toString(), root);
+		this.span = tracer.createSpan(name, root);
 		if (log.isDebugEnabled()) {
 			log.debug("Created span [{}]", this.span);
 		}

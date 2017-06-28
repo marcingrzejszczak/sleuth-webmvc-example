@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.context.Context;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,17 +35,17 @@ class FrontendController {
 	@Autowired RestTemplate template;
 	@Autowired Tracer tracer;
 
+	String blockingGet(){
+		return template.getForObject("http://localhost:9000/api", String.class);
+	}
+
 	@RequestMapping("/") public String callBackend() {
 		log.info("I'm here");
 		log.info("Current span [{}]", tracer.getCurrentSpan());
 		return Flux
 				.just(1,2,3)
-				.flatMapSequential(d -> Mono.fromCallable(() -> template.getForObject(
-						"http://localhost:9000/api",
-						String.class))
-				                    .subscribeOn(Schedulers.elastic())
-				.log())
-				.log()
+				.flatMap(d -> Mono.fromCallable(this::blockingGet)
+				                  .subscribeOn(Schedulers.elastic()))
 				.blockLast();
 	}
 
@@ -54,7 +55,8 @@ class FrontendController {
 
 	@PostConstruct public void foo() {
 		//ExceptionUtils.setFail(true);
-		Hooks.onSubscriber((subscriber, ctx) -> new SpanSubscriber(subscriber, ctx, tracer));
+		Hooks.onNewSubscriber((pub, sub) ->
+				new SpanSubscriber(sub, Context.from(sub), tracer, pub.toString()));
 		Schedulers.setFactory(new Schedulers.Factory() {
 			@Override public ScheduledExecutorService decorateScheduledExecutorService(
 					String schedulerType,
