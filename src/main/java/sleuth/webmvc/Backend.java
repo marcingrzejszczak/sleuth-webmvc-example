@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Backend {
 
-  @RequestMapping("/api") public String printDate() {
+  @RequestMapping("/api")
+  public String printDate() {
     return new Date().toString();
   }
 
