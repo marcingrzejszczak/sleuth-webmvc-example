@@ -1,4 +1,4 @@
-package sleuth.webmvc;
+package sleuth.webmvc.frontend;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;

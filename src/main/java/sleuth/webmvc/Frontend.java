@@ -1,11 +1,9 @@
 package sleuth.webmvc;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@EnableAutoConfiguration
-@ComponentScan(basePackageClasses = {FrontendController.class, BackendRepository.class})
+@SpringBootApplication
 public class Frontend {
 
   public static void main(String[] args) {

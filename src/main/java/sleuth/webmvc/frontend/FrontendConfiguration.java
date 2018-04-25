@@ -1,4 +1,4 @@
-package sleuth.webmvc;
+package sleuth.webmvc.frontend;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,4 +15,3 @@ public class FrontendConfiguration {
     }
 
 }
-
