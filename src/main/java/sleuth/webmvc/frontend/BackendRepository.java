@@ -1,6 +1,7 @@
 package sleuth.webmvc.frontend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
@@ -13,8 +14,11 @@ import java.util.concurrent.Future;
 @Repository
 public class BackendRepository {
 
-    @Autowired
     RestTemplate restTemplate;
+
+    public BackendRepository(RestTemplateBuilder builder) {
+        restTemplate = builder.build();
+    }
 
     @Async
     @Retryable(backoff = @Backoff(delay = 1000L))

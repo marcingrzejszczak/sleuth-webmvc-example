@@ -9,7 +9,7 @@ public class Frontend {
   public static void main(String[] args) {
     SpringApplication.run(Frontend.class,
         "--spring.application.name=frontend",
-        "--server.port=8081"
+        "--server.port=8082"
     );
   }
 
