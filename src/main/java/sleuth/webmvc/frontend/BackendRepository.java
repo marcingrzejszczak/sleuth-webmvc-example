@@ -1,5 +1,6 @@
 package sleuth.webmvc.frontend;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.retry.annotation.Backoff;
@@ -23,6 +24,6 @@ public class BackendRepository {
     @Async
     @Retryable(backoff = @Backoff(delay = 1000L))
     public Future<String> callingBackendAsync() {
-        return new AsyncResult<>(restTemplate.getForObject("http://localhost:9000/api", String.class));
+        return new AsyncResult<>(MDC.get("traceId"));
     }
 }

@@ -7,10 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Frontend {
 
   public static void main(String[] args) {
-    SpringApplication.run(Frontend.class,
-        "--spring.application.name=frontend",
-        "--server.port=8082"
-    );
+    SpringApplication.run(Frontend.class);
   }
 
 }
